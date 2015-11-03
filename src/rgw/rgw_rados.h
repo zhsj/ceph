@@ -2577,9 +2577,8 @@ public:
         ceph::real_time *lastmod;
         uint64_t *obj_size;
         map<string, bufferlist> *attrs;
-        struct rgw_err *perr;
 
-        StatParams() : lastmod(NULL), obj_size(NULL), attrs(NULL), perr(NULL) {}
+        StatParams() : lastmod(NULL), obj_size(NULL), attrs(NULL) {}
       } stat_params;
 
       struct ReadParams {
@@ -2690,9 +2689,8 @@ public:
         ceph::real_time *lastmod;
         uint64_t *obj_size;
         map<string, bufferlist> *attrs;
-        struct rgw_err *perr;
 
-        Params() : lastmod(NULL), obj_size(NULL), attrs(NULL), perr(NULL) {}
+        Params() : lastmod(NULL), obj_size(NULL), attrs(NULL) {}
       } params;
 
       explicit Read(RGWRados::Object *_source) : source(_source) {}
@@ -3003,7 +3001,6 @@ public:
                        string *version_id,
                        string *ptag,
                        ceph::buffer::list *petag,
-                       struct rgw_err *err,
                        void (*progress_cb)(off_t, void *),
                        void *progress_data);
   /**
@@ -3018,7 +3015,6 @@ public:
    *                               parameter, source object attributes are not copied;
    *            ATTRSMOD_MERGE - any conflicting meta keys on the source object's attributes
    *                             are overwritten by values contained in attrs parameter.
-   * err: stores any errors resulting from the get of the original object
    * Returns: 0 on success, -ERR# otherwise.
    */
   int copy_obj(RGWObjectCtx& obj_ctx,
@@ -3047,7 +3043,6 @@ public:
                string *version_id,
                string *ptag,
                ceph::buffer::list *petag,
-               struct rgw_err *err,
                void (*progress_cb)(off_t, void *),
                void *progress_data);
 
@@ -3065,8 +3060,7 @@ public:
 	       ceph::real_time delete_at,
                string *version_id,
                string *ptag,
-               ceph::buffer::list *petag,
-               struct rgw_err *err);
+               ceph::buffer::list *petag);
   
   int check_bucket_empty(RGWBucketInfo& bucket_info);
 
