@@ -132,6 +132,7 @@ public:
 class RGWRESTFlusher : public RGWFormatterFlusher {
   struct req_state *s;
   boost::function<void()> op;
+  RGWHandler* handler;
 protected:
   void do_flush() override;
   void do_start(int ret) override;
@@ -140,9 +141,10 @@ public:
     RGWFormatterFlusher(_s->formatter), s(_s), op(_op) {}
   RGWRESTFlusher() : RGWFormatterFlusher(NULL), s(NULL), op(NULL) {}
 
-  void init(struct req_state *_s, boost::function<void()> _op) {
+  void init(struct req_state *_s, boost::function<void()> _op, RGWHandler* _handler) {
     s = _s;
     op = _op;
+    handler = _handler;
     set_formatter(s->formatter);
   }
 };
@@ -401,7 +403,7 @@ public:
   void init(RGWRados *store, struct req_state *s,
             RGWHandler *dialect_handler) override {
     RGWOp::init(store, s, dialect_handler);
-    flusher.init(s, dump_access_control_f());
+    flusher.init(s, dump_access_control_f(), dialect_handler);
   }
   void send_response() override;
   virtual int check_caps(RGWUserCaps& caps)
@@ -439,6 +441,8 @@ public:
 
   virtual RGWOp* get_op(RGWRados* store);
   virtual void put_op(RGWOp* op);
+  virtual bool set_rgw_err(int err_no, bool is_website_redirect, int& http_ret, string& code) override;
+  virtual void dump(const string& code, const string& message) const override;
 };
 
 class RGWHandler_REST_SWIFT;
@@ -570,6 +574,7 @@ extern void dump_errno(const struct rgw_err &err, string& out);
 extern void dump_errno(struct req_state *s);
 extern void dump_errno(struct req_state *s, int http_ret);
 extern void end_header(struct req_state *s,
+                       RGWHandler* handler,
                        RGWOp* op = nullptr,
                        const char *content_type = nullptr,
                        const int64_t proposed_content_length =
@@ -577,6 +582,7 @@ extern void end_header(struct req_state *s,
 		       bool force_content_type = false,
 		       bool force_no_error = false);
 extern void end_header(struct req_state *s,
+                       RGWHandler* handler,
                        boost::function<void()> dump_more,
                        const char *content_type = nullptr,
                        const int64_t proposed_content_length =
