@@ -660,9 +660,9 @@ void dump_trans_id(req_state *s)
   }
 }
 
-void end_header(struct req_state* s, RGWHandler* handler, boost::function<void()> dump_more,
-		const char *content_type, const int64_t proposed_content_length,
-		bool force_content_type, bool force_no_error)
+void end_header(struct req_state* s, RGWHandler* handler, RGWOp* op, const char *content_type,
+		const int64_t proposed_content_length, bool force_content_type,
+		bool force_no_error)
 {
   string ctype;
 
@@ -674,8 +674,8 @@ void end_header(struct req_state* s, RGWHandler* handler, boost::function<void()
     dump_header(s, "x-amz-request-charged", "requester");
   }
 
-  if (dump_more) {
-    dump_more();
+  if (op) {
+    dump_access_control(s, op);
   }
 
   if (s->prot_flags & RGW_REST_SWIFT && !content_type) {
@@ -732,23 +732,28 @@ void end_header(struct req_state* s, RGWHandler* handler, boost::function<void()
   rgw_flush_formatter_and_reset(s, s->formatter);
 }
 
-void end_header(struct req_state* s, RGWHandler* handler, RGWOp* op, const char *content_type,
-		const int64_t proposed_content_length, bool force_content_type,
-		bool force_no_error)
+void abort_early(struct req_state *s, RGWOp* op, int err_no,
+		RGWHandler* handler)
 {
-  boost::function<void()> dump_more;
-
-  if (op) dump_more = op->dump_access_control_f();
-  end_header(s, handler, dump_more, content_type,
-	proposed_content_length, force_content_type, force_no_error);
-}
-
-void abort_early(struct req_state *s, boost::function<void()> dump_more,
-		string& error_content, int err_no, RGWHandler* handler)
-{
+  string error_content("");
   if (!s->formatter) {
     s->formatter = new JSONFormatter;
     s->format = RGW_FORMAT_JSON;
+  }
+
+  // op->error_handler is responsible for calling it's handler error_handler
+  if (op != NULL) {
+    int new_err_no;
+    new_err_no = op->error_handler(err_no, &error_content);
+    ldout(s->cct, 20) << "op->ERRORHANDLER: err_no=" << err_no
+		      << " new_err_no=" << new_err_no << dendl;
+    err_no = new_err_no;
+  } else if (handler != NULL) {
+    int new_err_no;
+    new_err_no = handler->error_handler(err_no, &error_content);
+    ldout(s->cct, 20) << "handler->ERRORHANDLER: err_no=" << err_no
+		      << " new_err_no=" << new_err_no << dendl;
+    err_no = new_err_no;
   }
 
   // If the error handler(s) above dealt with it completely, they should have
@@ -763,7 +768,7 @@ void abort_early(struct req_state *s, boost::function<void()> dump_more,
     if (err_no == -ERR_PERMANENT_REDIRECT || err_no == -ERR_WEBSITE_REDIRECT) {
       string dest_uri;
       if (!s->redirect.empty()) {
-	dest_uri = s->redirect;
+        dest_uri = s->redirect;
       } else if (!s->zonegroup_endpoint.empty()) {
         string dest_uri = s->zonegroup_endpoint;
         /*
@@ -792,37 +797,13 @@ void abort_early(struct req_state *s, boost::function<void()> dump_more,
        *   x-amz-error-message: The specified key does not exist.
        *   x-amz-error-detail-Key: foo
        */
-      end_header(s, handler, dump_more, NULL, error_content.size(), false, true);
+      end_header(s, handler, op, NULL, error_content.size(), false, true);
       RESTFUL_IO(s)->send_body(error_content.c_str(), error_content.size());
     } else {
-      end_header(s, handler, dump_more);
+      end_header(s, handler, op);
     }
   }
   perfcounter->inc(l_rgw_failed_req);
-}
-
-void abort_early(struct req_state *s, RGWOp* op, int err_no,
-		RGWHandler* handler)
-{
-  string error_content("");
-  boost::function<void()> dump_more;
-
-  // op->error_handler is responsible for calling it's handler error_handler
-  if (op != NULL) {
-    int new_err_no;
-    new_err_no = op->error_handler(err_no, &error_content);
-    ldout(s->cct, 20) << "op->ERRORHANDLER: err_no=" << err_no
-		      << " new_err_no=" << new_err_no << dendl;
-    err_no = new_err_no;
-  } else if (handler != NULL) {
-    int new_err_no;
-    new_err_no = handler->error_handler(err_no, &error_content);
-    ldout(s->cct, 20) << "handler->ERRORHANDLER: err_no=" << err_no
-		      << " new_err_no=" << new_err_no << dendl;
-    err_no = new_err_no;
-  }
-  if (op) dump_more = op->dump_access_control_f();
-  abort_early(s, dump_more, error_content, err_no, handler);
 }
 
 void dump_continue(struct req_state * const s)
@@ -1107,7 +1088,7 @@ void RGWRESTFlusher::do_start(int ret)
   set_req_state_err(s, ret, handler); /* no going back from here */
   dump_errno(s);
   dump_start(s);
-  end_header(s, handler, op);
+  end_header(s, handler);
   rgw_flush_formatter_and_reset(s, s->formatter);
 }
 
