@@ -1791,10 +1791,11 @@ struct req_state {
   req_state(CephContext* _cct, RGWEnv* e, RGWUserInfo* u);
   ~req_state();
 
-  void set_req_state_err(int err_no, RGWHandler* handler);
-  void set_req_state_err(int err_no, const string &err_msg, RGWHandler* handler);
   bool is_err() const { return err.is_err(); }
 };
+
+void set_req_state_err(struct req_state*, int, RGWHandler*);
+void set_req_state_err(struct req_state*, int, const string&, RGWHandler*);
 void set_req_state_err(struct rgw_err&, int, const int, RGWHandler*);
 
 /** Store basic data on bucket */

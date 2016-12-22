@@ -26,7 +26,7 @@ class RGWOp_Period_Base : public RGWRESTOp {
 // reply with the period object on success
 void RGWOp_Period_Base::send_response()
 {
-  s->set_req_state_err(http_ret, error_stream.str(), dialect_handler);
+  set_req_state_err(s, http_ret, error_stream.str(), dialect_handler);
   dump_errno(s);
 
   if (http_ret < 0) {
@@ -263,7 +263,7 @@ void RGWOp_Realm_Get::execute()
 
 void RGWOp_Realm_Get::send_response()
 {
-  s->set_req_state_err(http_ret, dialect_handler);
+  set_req_state_err(s, http_ret, dialect_handler);
   dump_errno(s);
 
   if (http_ret < 0) {

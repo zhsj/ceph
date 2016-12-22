@@ -33,7 +33,7 @@ void RGWOp_ZoneGroupMap_Get::execute() {
 }
 
 void RGWOp_ZoneGroupMap_Get::send_response() {
-  s->set_req_state_err(http_ret, dialect_handler);
+  set_req_state_err(s, http_ret, dialect_handler);
   dump_errno(s);
   end_header(s, dialect_handler);
 

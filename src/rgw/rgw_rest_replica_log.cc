@@ -108,7 +108,7 @@ void RGWOp_OBJLog_GetBounds::execute() {
 }
 
 void RGWOp_OBJLog_GetBounds::send_response() {
-  s->set_req_state_err(http_ret, dialect_handler);
+  set_req_state_err(s, http_ret, dialect_handler);
   dump_errno(s);
   end_header(s, dialect_handler);
 
@@ -230,7 +230,7 @@ void RGWOp_BILog_GetBounds::execute() {
 }
 
 void RGWOp_BILog_GetBounds::send_response() {
-  s->set_req_state_err(http_ret, dialect_handler);
+  set_req_state_err(s, http_ret, dialect_handler);
   dump_errno(s);
   end_header(s, dialect_handler);
 

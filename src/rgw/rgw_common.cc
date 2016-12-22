@@ -309,15 +309,19 @@ void set_req_state_err(struct rgw_err& err,	/* out */
   err.s3_code = "UnknownError";
 }
 
-void req_state::set_req_state_err(int err_no, RGWHandler* handler)
+void set_req_state_err(struct req_state* s, int err_no, const string& err_msg, RGWHandler* handler)
 {
-  ::set_req_state_err(err, err_no, prot_flags, handler);
+  if (s) {
+    set_req_state_err(s, err_no, handler);
+    s->err.message = err_msg;
+  }
 }
 
-void req_state::set_req_state_err(int err_no, const string &err_msg, RGWHandler* handler)
+void set_req_state_err(struct req_state* s, int err_no, RGWHandler* handler)
 {
-   set_req_state_err(err_no, handler);
-   err.message = err_msg;
+  if (s) {
+    set_req_state_err(s->err, err_no, s->prot_flags, handler);
+  }
 }
 
 struct str_len {

@@ -756,7 +756,7 @@ void abort_early(struct req_state *s, boost::function<void()> dump_more,
   if (err_no) {
     // Watch out, we might have a custom error state already set!
     if (!s->err.http_ret || s->err.http_ret == 200) {
-      s->set_req_state_err(err_no, handler);
+      set_req_state_err(s, err_no, handler);
     }
     dump_errno(s);
     dump_bucket_from_state(s);
@@ -1104,7 +1104,7 @@ int RESTArgs::get_bool(struct req_state *s, const string& name, bool def_val, bo
 
 void RGWRESTFlusher::do_start(int ret)
 {
-  s->set_req_state_err(ret, handler); /* no going back from here */
+  set_req_state_err(s, ret, handler); /* no going back from here */
   dump_errno(s);
   dump_start(s);
   end_header(s, handler, op);
@@ -1504,7 +1504,7 @@ int RGWDeleteMultiObj_ObjStore::get_params()
 void RGWRESTOp::send_response()
 {
   if (!flusher.did_start()) {
-    s->set_req_state_err(http_ret, dialect_handler);
+    set_req_state_err(s, http_ret, dialect_handler);
     dump_errno(s);
     end_header(s, dialect_handler, this);
   }
