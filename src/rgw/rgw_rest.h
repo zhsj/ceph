@@ -131,7 +131,6 @@ public:
 
 class RGWRESTFlusher : public RGWFormatterFlusher {
   struct req_state *s;
-  RGWHandler* handler;
 protected:
   void do_flush() override;
   void do_start(int ret) override;
@@ -140,9 +139,8 @@ public:
     RGWFormatterFlusher(_s->formatter), s(_s) {}
   RGWRESTFlusher() : RGWFormatterFlusher(NULL), s(NULL) {}
 
-  void init(struct req_state *_s, RGWHandler* _handler) {
+  void init(struct req_state *_s) {
     s = _s;
-    handler = _handler;
     set_formatter(s->formatter);
   }
 };
@@ -401,7 +399,7 @@ public:
   void init(RGWRados *store, struct req_state *s,
             RGWHandler *dialect_handler) override {
     RGWOp::init(store, s, dialect_handler);
-    flusher.init(s, dialect_handler);
+    flusher.init(s);
   }
   void send_response() override;
   virtual int check_caps(RGWUserCaps& caps)
@@ -439,8 +437,6 @@ public:
 
   virtual RGWOp* get_op(RGWRados* store);
   virtual void put_op(RGWOp* op);
-  virtual bool set_rgw_err(int err_no, bool is_website_redirect, int& http_ret, string& code) override;
-  virtual void dump(const string& code, const string& message) const override;
 };
 
 class RGWHandler_REST_SWIFT;
@@ -572,7 +568,6 @@ extern void dump_errno(const struct rgw_err &err, string& out);
 extern void dump_errno(struct req_state *s);
 extern void dump_errno(struct req_state *s, int http_ret);
 extern void end_header(struct req_state *s,
-                       RGWHandler* handler,
                        RGWOp* op = nullptr,
                        const char *content_type = nullptr,
                        const int64_t proposed_content_length =

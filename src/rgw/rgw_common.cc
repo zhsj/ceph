@@ -288,20 +288,38 @@ req_state::~req_state() {
   delete object_acl;
 }
 
+bool search_err(rgw_http_errors& errs, int err_no, bool is_website_redirect, int& http_ret, string& code)
+{
+  auto r = errs.find(err_no);
+  if (r != errs.end()) {
+    if (! is_website_redirect)
+      http_ret = r->second.first;
+     code = r->second.second;
+     return true;
+  }
+  return false;
+}
+
 void set_req_state_err(struct rgw_err& err,	/* out */
 			int err_no,		/* in  */
-			const int prot_flags,	/* in  */
-      RGWHandler* handler) /* in */
+			const int prot_flags)	/* in  */
 {
   if (err_no < 0)
     err_no = -err_no;
 
   err.ret = -err_no;
+  err.is_website_redirect = false;
+
+  if (prot_flags & RGW_REST_SWIFT) {
+    if (search_err(rgw_http_swift_errors, err_no, err.is_website_redirect, err.http_ret, err.s3_code))
+      return;
+  }
+
+  //Default to searching in s3 errors
   err.is_website_redirect |= (prot_flags & RGW_REST_WEBSITE)
 		&& err_no == ERR_WEBSITE_REDIRECT && err.is_clear();
-  assert(handler);
-  if (handler->set_rgw_err(err_no, err.is_website_redirect, err.http_ret, err.s3_code))
-    return;
+  if (search_err(rgw_http_s3_errors, err_no, err.is_website_redirect, err.http_ret, err.s3_code))
+      return;
   dout(0) << "WARNING: set_req_state_err err_no=" << err_no
 	<< " resorting to 500" << dendl;
 
@@ -309,19 +327,36 @@ void set_req_state_err(struct rgw_err& err,	/* out */
   err.s3_code = "UnknownError";
 }
 
-void set_req_state_err(struct req_state* s, int err_no, const string& err_msg, RGWHandler* handler)
+void set_req_state_err(struct req_state* s, int err_no, const string& err_msg)
 {
   if (s) {
-    set_req_state_err(s, err_no, handler);
+    set_req_state_err(s, err_no);
     s->err.message = err_msg;
   }
 }
 
-void set_req_state_err(struct req_state* s, int err_no, RGWHandler* handler)
+void set_req_state_err(struct req_state* s, int err_no)
 {
   if (s) {
-    set_req_state_err(s->err, err_no, s->prot_flags, handler);
+    set_req_state_err(s->err, err_no, s->prot_flags);
   }
+}
+
+void dump(struct req_state* s)
+{
+  if (s->format != RGW_FORMAT_HTML)
+    s->formatter->open_object_section("Error");
+  if (!s->err.s3_code.empty())
+    s->formatter->dump_string("Code", s->err.s3_code);
+  if (!s->err.message.empty())
+    s->formatter->dump_string("Message", s->err.message);
+  if (!s->bucket_name.empty())	// TODO: connect to expose_bucket
+    s->formatter->dump_string("BucketName", s->bucket_name);
+  if (!s->trans_id.empty())	// TODO: connect to expose_bucket or another toggle
+    s->formatter->dump_string("RequestId", s->trans_id);
+  s->formatter->dump_string("HostId", s->host_id);
+  if (s->format != RGW_FORMAT_HTML)
+    s->formatter->close_section();
 }
 
 struct str_len {
