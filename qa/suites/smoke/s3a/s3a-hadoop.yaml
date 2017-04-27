@@ -18,7 +18,7 @@ overrides:
         journal_collocation: true
         journal_size: 1024
 roles:
-- [mon.a, osd.0, osd.1, osd.2, rgw.0]
+- [mon.a, mgr.x, osd.0, osd.1, osd.2, rgw.0]
 - [osd.3, osd.4, osd.5]
 - [osd.6, osd.7, osd.8]
 tasks:
