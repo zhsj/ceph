@@ -1353,7 +1353,7 @@ int validate_pool(IoCtx &io_ctx, CephContext *cct) {
       r = cls_client::dir_get_id(&io_ctx, RBD_DIRECTORY, image_name, &image_id);
       if (r < 0) {
         if (r != -ENOENT) {
-          ldout(cct, 2) << "error reading image id from dirctory: "
+          ldout(cct, 2) << "error reading image id from directory: "
                         << cpp_strerror(-r) << dendl;
         }
         return r;

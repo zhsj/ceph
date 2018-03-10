@@ -1723,7 +1723,7 @@ TEST_P(StoreTestSpecificAUSize, BluestoreFragmentedBlobTest) {
     t.write(cid, hoid, 0, 0x30000, bl);
     t.zero(cid, hoid, 0, 0x10000);
     t.zero(cid, hoid, 0x20000, 0x10000);
-    cerr << "Rewrite an object and create two holes at the begining and the end" << std::endl;
+    cerr << "Rewrite an object and create two holes at the beginning and the end" << std::endl;
     r = apply_transaction(store, &osr, std::move(t));
     ASSERT_EQ(r, 0);
 

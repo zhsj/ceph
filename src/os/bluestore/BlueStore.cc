@@ -3652,7 +3652,7 @@ void BlueStore::_set_compression()
 
   if (comp_mode == Compressor::COMP_NONE) {
     dout(10) << __func__ << " compression mode set to 'none', "
-             << "ignore other compression setttings" << dendl;
+             << "ignore other compression settings" << dendl;
     return;
   }
 

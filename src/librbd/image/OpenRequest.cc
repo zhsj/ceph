@@ -181,7 +181,7 @@ Context *OpenRequest<I>::handle_v2_get_name(int *result) {
     *result = cls_client::dir_get_name_finish(&it, &m_image_ctx->name);
   }
   if (*result < 0 && *result != -ENOENT) {
-    lderr(cct) << "failed to retreive name: "
+    lderr(cct) << "failed to retrieve name: "
                << cpp_strerror(*result) << dendl;
     send_close_image(*result);
   } else if (*result == -ENOENT) {
@@ -231,7 +231,7 @@ Context *OpenRequest<I>::handle_v2_get_name_from_trash(int *result) {
       ldout(cct, 5) << "failed to retrieve name for image id "
                     << m_image_ctx->id << dendl;
     } else {
-      lderr(cct) << "failed to retreive name from trash: "
+      lderr(cct) << "failed to retrieve name from trash: "
                  << cpp_strerror(*result) << dendl;
     }
     send_close_image(*result);
@@ -273,7 +273,7 @@ Context *OpenRequest<I>::handle_v2_get_immutable_metadata(int *result) {
       &it, &m_image_ctx->object_prefix, &m_image_ctx->order);
   }
   if (*result < 0) {
-    lderr(cct) << "failed to retreive immutable metadata: "
+    lderr(cct) << "failed to retrieve immutable metadata: "
                << cpp_strerror(*result) << dendl;
     send_close_image(*result);
   } else {

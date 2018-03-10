@@ -214,7 +214,7 @@ int main(int argc, char **argv)
       exit(EXIT_FAILURE);
     }
     if (devs.empty()) {
-      cout << "infering bluefs devices from bluestore path" << std::endl;
+      cout << "inferring bluefs devices from bluestore path" << std::endl;
       for (auto fn : {"block", "block.wal", "block.db"}) {
 	string p = path + "/" + fn;
 	struct stat st;
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
       cerr << "must specify out-dir to export bluefs" << std::endl;
       exit(EXIT_FAILURE);
     }
-    cout << "infering bluefs devices from bluestore path" << std::endl;
+    cout << "inferring bluefs devices from bluestore path" << std::endl;
     for (auto fn : {"block", "block.wal", "block.db"}) {
       string p = path + "/" + fn;
       struct stat st;
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
       cerr << "must specify bluestore path" << std::endl;
       exit(EXIT_FAILURE);
     }
-    cout << "infering bluefs devices from bluestore path" << std::endl;
+    cout << "inferring bluefs devices from bluestore path" << std::endl;
     for (auto fn : {"block", "block.wal", "block.db"}) {
       string p = path + "/" + fn;
       struct stat st;

@@ -2504,7 +2504,7 @@ static int rgw_bi_list_op(cls_method_context_t hctx, bufferlist *in, bufferlist 
   bool more;
   int ret = list_plain_entries(hctx, op.name, op.marker, max, &op_ret.entries, &more); 
   if (ret < 0) {
-    CLS_LOG(0, "ERROR: %s(): list_plain_entries retured ret=%d", __func__, ret);
+    CLS_LOG(0, "ERROR: %s(): list_plain_entries returned ret=%d", __func__, ret);
     return ret;
   }
   int count = ret;
@@ -2514,7 +2514,7 @@ static int rgw_bi_list_op(cls_method_context_t hctx, bufferlist *in, bufferlist 
   if (!more) {
     ret = list_instance_entries(hctx, op.name, op.marker, max - count, &op_ret.entries, &more);
     if (ret < 0) {
-      CLS_LOG(0, "ERROR: %s(): list_instance_entries retured ret=%d", __func__, ret);
+      CLS_LOG(0, "ERROR: %s(): list_instance_entries returned ret=%d", __func__, ret);
       return ret;
     }
 
@@ -2524,7 +2524,7 @@ static int rgw_bi_list_op(cls_method_context_t hctx, bufferlist *in, bufferlist 
   if (!more) {
     ret = list_olh_entries(hctx, op.name, op.marker, max - count, &op_ret.entries, &more);
     if (ret < 0) {
-      CLS_LOG(0, "ERROR: %s(): list_olh_entries retured ret=%d", __func__, ret);
+      CLS_LOG(0, "ERROR: %s(): list_olh_entries returned ret=%d", __func__, ret);
       return ret;
     }
 
