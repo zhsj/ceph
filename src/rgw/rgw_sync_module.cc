@@ -6,6 +6,7 @@
 
 #include "rgw_sync_module_log.h"
 #include "rgw_sync_module_es.h"
+#include "rgw_sync_module_mq.h"
 
 #include <boost/asio/yield.hpp>
 
@@ -63,4 +64,7 @@ void rgw_register_sync_modules(RGWSyncModulesManager *modules_manager)
 
   RGWSyncModuleRef es_module(std::make_shared<RGWElasticSyncModule>());
   modules_manager->register_module("elasticsearch", es_module);
+
+  RGWSyncModuleRef mq_module(std::make_shared<RGWMQSyncModule>());
+  modules_manager->register_module("mq", mq_module);
 }
