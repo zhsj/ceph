@@ -52,7 +52,7 @@ class RGWMQStatRemoteObjCBCR : public RGWStatRemoteObjCBCR {
                 obj_message doc(bucket_info, key);
                 call(new RGWPutRESTResourceCR<obj_message, int>(sync_env->cct, conf->conn.get(),
                             sync_env->http_manager,
-                            nullptr, nullptr,
+                            "/put", nullptr,
                             doc, nullptr));
             }
             if (retcode < 0) {
