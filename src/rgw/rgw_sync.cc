@@ -2288,7 +2288,7 @@ int RGWCloneMetaLogCoroutine::state_read_shard_status()
   completion.reset(new RGWMetadataLogInfoCompletion(
     [this](int ret, const cls_log_header& header) {
       if (ret < 0) {
-        ldout(cct, 1) << "ERROR: failed to read mdlog info with "
+        ldout(cct, 10) << "ERROR: failed to read mdlog info with "
             << cpp_strerror(ret) << dendl;
       } else {
         shard_info.marker = header.max_marker;
